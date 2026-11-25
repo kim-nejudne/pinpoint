@@ -146,7 +146,7 @@ M1 delivers the thinnest playable game: a Screen and phones in a room, the cross
   - Spec: Overview
   - Depends: F60
   - Done when:
-    - `CASE-STUDY.md` in `pinpoint/`, in the shape of the siblings' case studies, passing `../hub/scripts/case-study/policy.mjs`
+    - `hub/case-studies/pinpoint.md` in the portfolio repo, in the shape of the other case studies, passing `hub/scripts/case-study/policy.mjs`
     - Pinpoint's entry in `../hub/src/spokes.ts`, its crop in `../hub/public/crops/` (900 × 600, `.png` and `.avif`), the `../.github/workflows/deploy-hub.yml` paths line, and anything else `../hub/README.md` lists for a new spoke; the hub's own checks pass
     - Kim check: the crop and the case study read well on the live hub
   - Gate: Kim approves adding Pinpoint to the public hub

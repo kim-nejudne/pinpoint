@@ -61,7 +61,7 @@ GH_REPO='kim-nejudne/portfolio'
 REPO_VISIBILITY='public'
 DROPLET='165.245.189.5'
 HEALTH_PATH='/healthz'
-WORKFLOW='deploy-pinpoint.yml'
+WORKFLOW='deploy.yml'
 # Exists once F01 has scaffolded the project; before that there is nothing to check.
 SCAFFOLD_FILE='package.json'
 # Monorepo mode: the app is pinpoint/ of kim-nejudne/portfolio. The run works in a git worktree of its

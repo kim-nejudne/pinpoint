@@ -80,11 +80,11 @@ Pinpoint runs on Kim's DigitalOcean droplet at **https://pinpoint.kimnejudne.dev
 
 The droplet's root setup (the directory, `.env`, the vhost, the certificate and the backup cron) was done in the bootstrap on 2026-11-07. `deploy/nginx/pinpoint.conf` and `deploy/nginx/pinpoint-bootstrap.conf` are the live files; keep them in step with the box.
 
-`$DEPLOY_HOST` below is the droplet as `user@host` (the `deploy` user, never root, except where a step says so). It is not recorded in this repository. Run every command from `pinpoint/`.
+`$DEPLOY_HOST` below is the droplet as `user@host` (the `deploy` user, never root, except where a step says so). It is not recorded in this repository. Run every command from the repository root.
 
 > **A deploy ends every live game.** Rooms live in memory, so a restart drops them. The workflow waits for this (below).
 
-**A push to `main` that touches `pinpoint/` deploys it.** Markdown, `docs/` and `.claude/` changes don't count. The workflow is `.github/workflows/deploy-pinpoint.yml` in the portfolio:
+**A push to `main` deploys it.** Markdown, `docs/` and `.claude/` changes don't count. The workflow is `.github/workflows/deploy.yml`:
 
 1. `checks`: format, lint, typecheck, test and build run on the runner.
 2. `droplet`: `scripts/docker-smoke.sh pinpoint:<tag>` builds the image and smoke-tests it there with `TRUST_PROXY`, `NODE_OPTIONS`, `DATA_DIR`, the data volume, `mem_limit` and the port read from the compose file. The tag is the last commit that changed shipped code under `pinpoint/`, not the repository HEAD.
@@ -96,7 +96,7 @@ The droplet's root setup (the directory, `.env`, the vhost, the certificate and 
 A Screen left open on a TV keeps its socket, so the wait can fail with no game running. Then:
 
 ```sh
-gh workflow run deploy-pinpoint.yml -f force=true   # ends any live games
+gh workflow run deploy.yml -f force=true   # ends any live games
 ```
 
 ### Routine deploy (break-glass)
@@ -134,7 +134,7 @@ Earlier images stay on the box. The push-button way re-points `IMAGE_TAG` throug
 
 ```sh
 ssh $DEPLOY_HOST 'docker images pinpoint'              # known tags
-gh workflow run deploy-pinpoint.yml -f tag=<good-tag>  # Actions → Deploy Pinpoint → Run workflow, same thing
+gh workflow run deploy.yml -f tag=<good-tag>  # Actions → Deploy Pinpoint → Run workflow, same thing
 ```
 
 By hand, the `sed … && docker compose up -d` line of the routine deploy with `<good-tag>`. Prune old tags now and then with `docker image rm pinpoint:<old-tag>`; the disk is shared.

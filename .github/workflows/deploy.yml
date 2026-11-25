@@ -1,7 +1,7 @@
 # Push-to-deploy for pinpoint.kimnejudne.dev.
 #
 # Modelled on deploy-sketchy.yml, with Pinpoint's own port (3009), stack directory (/opt/pinpoint)
-# and image (pinpoint:<tag>). It is the routine deploy in `pinpoint/README.md` run by a machine
+# and image (pinpoint:<tag>). It is the routine deploy in `README.md` run by a machine
 # instead of a person. The checks run on the runner, the image is built and smoke-tested there
 # (scripts/docker-smoke.sh), shipped with `docker save | ssh docker load`, and one script on the
 # box re-points IMAGE_TAG, restarts the container and waits for /healthz, rolling back if it
@@ -23,14 +23,15 @@ name: Deploy Pinpoint
 on:
   push:
     branches: [main]
-    # Only this app's code ships in the image; other projects in the repo, docs and the roadmap
+    # Only the app's code ships in the image; docs and the roadmap
     # don't.
     paths:
-      - "pinpoint/**"
-      - "!pinpoint/**/*.md"
-      - "!pinpoint/docs/**"
-      - "!pinpoint/.claude/**"
-      - ".github/workflows/deploy-pinpoint.yml"
+      - '**'
+      - '!**/*.md'
+      - '!docs/**'
+      - '!.claude/**'
+      - '!.github/**'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
     inputs:
       tag:
@@ -38,7 +39,7 @@ on:
           Existing pinpoint:<tag> on the box to re-point IMAGE_TAG to (a rollback). Leave empty
           to build and deploy HEAD.
         required: false
-        default: ""
+        default: ''
       force:
         description: Restart even with live connections (ends them).
         type: boolean
@@ -55,8 +56,6 @@ concurrency:
 defaults:
   run:
     shell: bash
-    # Every step runs in the app's own directory of the monorepo.
-    working-directory: pinpoint
 
 jobs:
   test:
@@ -70,7 +69,6 @@ jobs:
         with:
           node-version-file: .node-version
           cache: npm
-          cache-dependency-path: pinpoint/package-lock.json
       - name: install
         run: npm ci
       - name: format
@@ -96,7 +94,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # the tag is the last commit that changed pinpoint/
+          fetch-depth: 0 # the tag is the last commit that changed shipped code
 
       - name: resolve tag
         id: tag
@@ -108,7 +106,7 @@ jobs:
             tag="$TAG_INPUT"; mode=repoint
           else
             # Other projects' commits don't change this app's image, so they don't name it.
-            tag=$(git log -1 --format=%H -- . ':!*.md' ':!docs' ':!.claude' | cut -c1-12); mode=build
+            tag=$(git log -1 --format=%H -- . ':!*.md' ':!docs' ':!.claude' ':!.github' | cut -c1-12); mode=build
           fi
           echo "tag=$tag  mode=$mode"
           { echo "tag=$tag"; echo "mode=$mode"; } >> "$GITHUB_OUTPUT"
@@ -141,7 +139,6 @@ jobs:
         with:
           node-version-file: .node-version
           cache: npm
-          cache-dependency-path: pinpoint/package-lock.json
       - name: install
         run: npm ci
 
@@ -257,5 +254,5 @@ jobs:
       # smoke is on: /opt/pinpoint/.env has the CARTO key and the admin hash (DECISIONS 6 and
       # 68; README, Turning on the stricter smoke).
       - name: smoke
-        env: { SMOKE_EXPECT_TILES: "1", SMOKE_EXPECT_ADMIN: "1" }
+        env: { SMOKE_EXPECT_TILES: '1', SMOKE_EXPECT_ADMIN: '1' }
         run: npm run smoke -- https://pinpoint.kimnejudne.dev
